@@ -21,7 +21,7 @@ class MyBlunoCallback extends BluetoothGattCallback {
     private UUID SerialPortUUID = UUID.fromString("0000dfb1-0000-1000-8000-00805f9b34fb");
     private BluetoothGattCharacteristic serialCharacteristic;
     private boolean writing = false;
-
+ 
 
     public MyBlunoCallback(MainActivity activity) {
         this.activity = activity;
