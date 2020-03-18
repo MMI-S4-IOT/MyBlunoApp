@@ -1,21 +1,31 @@
 package fr.usmb.mmi.s4.myblunoapp;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String LOG_TAG = "MainActivity";
+    private static final int REQUEST_ENABLE_BT = 1;
+    private static final int REQUEST_SCAN_LE = 2;
 
     private String blunoAddr = "D0:39:72:A0:CC:15";
     private MyBlunoCallback callback;
     private BluetoothGatt gatt;
     private Button toggleLedButton;
+    private boolean requestEnableBluetooth = true;
+
+    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +33,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         toggleLedButton = this.findViewById(R.id.toggleLedButton);
         toggleLedButton.setOnClickListener((v)->{write("LED1\n");});
+        Button scanButton = this.findViewById(R.id.scanButton);
+        Intent scanIntent = new Intent(this, ScanActivity.class);
+        scanButton.setOnClickListener((v)->{
+            this.disconnectBluno();
+            startActivityForResult(scanIntent, REQUEST_SCAN_LE);
+        });
+        textView = this.findViewById(R.id.textView);
     }
 
     public void write(String command) {
@@ -34,20 +51,39 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void onNewData(String s) {
+        this.runOnUiThread(()->{
+            textView.append(s + "\n");
+        });
+    }
+
     private void connectBluno(){
         BluetoothAdapter bluetoothApdater = BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice blunoDevice = bluetoothApdater.getRemoteDevice(blunoAddr);
-        callback = new MyBlunoCallback(this);
-        gatt = blunoDevice.connectGatt(this, false, callback);
+        if (bluetoothApdater == null ) {
+            Log.e(LOG_TAG, "Ce peripherique ne supporte pas bluetooth");
+            Toast.makeText(this, "Ce peripherique ne supporte pas bluetooth", Toast.LENGTH_LONG).show();
+        } else if (!bluetoothApdater.isEnabled()) {
+            Log.e(LOG_TAG, "Bluetooth non active");
+            Toast.makeText(this, "Bluetooth non active", Toast.LENGTH_LONG).show();
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            if (requestEnableBluetooth) startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        } else {
+            BluetoothDevice blunoDevice = bluetoothApdater.getRemoteDevice(blunoAddr);
+            callback = new MyBlunoCallback(this);
+            gatt = blunoDevice.connectGatt(this, false, callback);
+        }
     }
 
     private void disconnectBluno(){
-        gatt.disconnect();
-        gatt.close();
+        if (gatt != null) {
+            gatt.disconnect();
+            gatt.close();
+        }
     }
 
     @Override
     protected void onStart() {
+        requestEnableBluetooth = true;
         super.onStart();
     }
 
@@ -60,11 +96,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         this.connectBluno();
+        textView.setText(blunoAddr);
+        textView.append("\n");
     }
 
     @Override
     protected void onPause() {
         this.disconnectBluno();
         super.onPause();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_ENABLE_BT && resultCode == RESULT_OK){
+            //le bluetooth a ete active
+        } else if (requestCode == REQUEST_ENABLE_BT && resultCode == RESULT_CANCELED){
+            requestEnableBluetooth = false;
+            Log.d(LOG_TAG, "L'unyilisateur n'a pas active l'adaptateur bluetooh");
+        } else if (requestCode == REQUEST_SCAN_LE && resultCode == RESULT_OK){
+            String newAdr = data.getStringExtra("deviceAddress");
+            blunoAddr = newAdr;
+        } else if (requestCode == REQUEST_SCAN_LE && resultCode == RESULT_OK){
+            // on garde l'ancienne adrese
+        }
     }
 }

@@ -57,6 +57,7 @@ class MyBlunoCallback extends BluetoothGattCallback {
             }
             if (serialCharacteristic != null) {
                 Log.d(LOG_TAG, "Acces au port serie bluno: OK");
+                gatt.setCharacteristicNotification(serialCharacteristic, true);
             } else {
                 Log.d(LOG_TAG, "Acces au port serie bluno: OK");
             }
@@ -72,6 +73,20 @@ class MyBlunoCallback extends BluetoothGattCallback {
             Log.d(LOG_TAG, "Reussite envoie de la commande: ok" + new String(characteristic.getValue()));
         } else {
             Log.w(LOG_TAG, "Echec envoie de la commande: KO" + new String(characteristic.getValue()));
+        }
+    }
+
+    @Override
+    public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+        super.onCharacteristicRead(gatt, characteristic, status);
+    }
+
+    @Override
+    public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+        if (serialCharacteristic.getUuid().equals(characteristic.getUuid())) {
+            Log.d(LOG_TAG, "Nouvelles donnes sur le port serie");
+            String s = new String(characteristic.getValue());
+            activity.onNewData(s);
         }
     }
 

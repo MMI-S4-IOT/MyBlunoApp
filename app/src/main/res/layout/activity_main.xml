@@ -12,6 +12,12 @@
         android:orientation="vertical">
 
         <Button
+            android:id="@+id/scanButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lancement scan bluetooth" />
+
+        <Button
             android:id="@+id/toggleLedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -19,6 +25,7 @@
             />
 
         <TextView
+            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hello World!"
