@@ -11,11 +11,23 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <Switch
+            android:id="@+id/connectionStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Etat connection" />
+
         <Button
             android:id="@+id/scanButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Lancement scan bluetooth" />
+
+        <Switch
+            android:id="@+id/ledStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Etat LED" />
 
         <Button
             android:id="@+id/toggleLedButton"
@@ -23,6 +35,20 @@
             android:layout_height="wrap_content"
             android:text="LED on/off"
             />
+
+        <EditText
+            android:id="@+id/editCommand"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="LED1" />
+
+        <Button
+            android:id="@+id/sendCommand"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Envoyer commande" />
 
         <TextView
             android:id="@+id/textView"

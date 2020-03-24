@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,7 +27,10 @@ public class MainActivity extends AppCompatActivity {
     private Button toggleLedButton;
     private boolean requestEnableBluetooth = true;
 
+    private EditText editCommand;
     private TextView textView;
+    private Switch connectionStatus;
+    private Switch ledStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,24 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(scanIntent, REQUEST_SCAN_LE);
         });
         textView = this.findViewById(R.id.textView);
+        editCommand = this.findViewById(R.id.editCommand);
+        Button sendCommandButton = this.findViewById(R.id.sendCommand);
+        sendCommandButton.setOnClickListener((v)->{
+            String s = editCommand.getText().toString() + "\n";
+            write(s);
+        });
+
+        connectionStatus = this.findViewById(R.id.connectionStatus);
+        ledStatus = this.findViewById(R.id.ledStatus);
+    }
+
+
+    public void setConnectionStatus(boolean status){
+        this.runOnUiThread(() -> connectionStatus.setChecked(status));
+    }
+
+    public void setLedStatus(boolean status){
+        this.runOnUiThread(() -> ledStatus.setChecked(status));
     }
 
     public void write(String command) {
@@ -52,8 +75,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onNewData(String s) {
+        if ("LED1:on\n".equals(s)){
+            this.setLedStatus(true);
+        } else if (("LED1:off\n".equals(s))) {
+            this.setLedStatus(false);
+        }
         this.runOnUiThread(()->{
-            textView.append(s + "\n");
+            textView.append(s);
         });
     }
 
