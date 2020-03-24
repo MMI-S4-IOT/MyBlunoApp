@@ -74,15 +74,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public String data = "";
+
     public void onNewData(String s) {
-        if ("LED1:on\n".equals(s)){
-            this.setLedStatus(true);
-        } else if (("LED1:off\n".equals(s))) {
-            this.setLedStatus(false);
+        data = data + s;
+
+        while (data.contains("\n")) {
+            String[] splitString = data.split("\n", 2);
+            final String command = splitString[0];
+            data = splitString[1];
+            if ("LED1:on".equals(command)) {
+                this.setLedStatus(true);
+            }
+            else if (("LED1:off".equals(command))) {
+                this.setLedStatus(false);
+            }
+            this.runOnUiThread(() -> {
+                textView.append(command + "\n");
+            });
         }
-        this.runOnUiThread(()->{
-            textView.append(s);
-        });
     }
 
     private void connectBluno(){
